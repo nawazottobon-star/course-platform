@@ -1,0 +1,139 @@
+// This Prisma schema is the TUTOR-BACKEND view of the shared database.
+// It includes tutor-owned models (R/W) and shared models (READ-ONLY from tutor perspective).
+// Schema changes to shared models must be coordinated with the core backend.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────
+
+enum Role {
+  learner
+  tutor
+  admin
+}
+
+// ─── Shared Models (READ-ONLY from tutor backend) ───────────
+
+model User {
+  userId       String         @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+  email        String         @unique @map("email")
+  fullName     String         @map("full_name")
+  passwordHash String         @map("password_hash")
+  role         Role           @default(learner) @map("role")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  enrollments  Enrollment[]
+  sessions     UserSession[]
+  tutorProfile Tutor?
+
+  @@map("users")
+}
+
+model Course {
+  courseId     String      @id @default(dbgenerated("gen_random_uuid()")) @map("course_id") @db.Uuid
+  slug        String      @unique @map("slug")
+  courseName  String      @map("course_name")
+  description String
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  enrollments Enrollment[]
+  topics      Topic[]
+  tutors      CourseTutor[]
+
+  @@map("courses")
+}
+
+model Enrollment {
+  enrollmentId String   @id @default(dbgenerated("gen_random_uuid()")) @map("enrollment_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  courseId     String   @map("course_id") @db.Uuid
+  status       String   @default("active")
+  enrolledAt   DateTime @default(now()) @map("enrolled_at")
+  user         User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  course       Course   @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+
+  @@unique([userId, courseId], map: "uq_user_course_enroll")
+  @@map("enrollments")
+}
+
+model Topic {
+  topicId     String   @id @default(dbgenerated("gen_random_uuid()")) @map("topic_id") @db.Uuid
+  courseId    String   @map("course_id") @db.Uuid
+  moduleNo    Int      @map("module_no")
+  moduleName  String   @map("module_name")
+  topicNumber Int      @map("topic_number")
+  topicName   String   @map("topic_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+  course      Course   @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+
+  @@unique([courseId, moduleNo, topicNumber], map: "uq_topic_per_module")
+  @@map("topics")
+}
+
+model UserSession {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  jwtId          String   @unique @map("jwt_id")
+  refreshToken   String   @map("refresh_token")
+  createdAt      DateTime @default(now()) @map("created_at")
+  expiresAt      DateTime @map("expires_at")
+  user           User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId], map: "idx_user_sessions_user_id")
+  @@map("user_sessions")
+}
+
+// ─── Tutor-Owned Models (READ/WRITE) ────────────────────────
+
+model Tutor {
+  tutorId     String         @id @default(dbgenerated("gen_random_uuid()")) @map("tutor_id") @db.Uuid
+  userId      String         @unique @map("user_id") @db.Uuid
+  displayName String         @map("display_name")
+  bio         String?        @map("bio")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  user        User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  courses     CourseTutor[]
+
+  @@map("tutors")
+}
+
+model CourseTutor {
+  courseTutorId String   @id @default(dbgenerated("gen_random_uuid()")) @map("course_tutor_id") @db.Uuid
+  courseId      String   @map("course_id") @db.Uuid
+  tutorId       String   @map("tutor_id") @db.Uuid
+  role          String   @default("owner") @map("role")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  course        Course   @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+  tutor         Tutor    @relation(fields: [tutorId], references: [tutorId], onDelete: Cascade)
+
+  @@unique([courseId, tutorId], map: "uq_course_tutor_assignment")
+  @@map("course_tutors")
+}
+
+model TutorApplication {
+  applicationId     String   @id @default(dbgenerated("gen_random_uuid()")) @map("application_id") @db.Uuid
+  fullName          String   @map("full_name")
+  email             String
+  phone             String?
+  headline          String
+  courseTitle       String   @map("course_title")
+  courseDescription String   @map("course_description")
+  targetAudience    String   @map("target_audience")
+  expertiseArea     String   @map("expertise_area")
+  experienceYears   Int?     @map("experience_years")
+  availability      String   @map("availability")
+  status            String   @default("pending")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("tutor_applications")
+}

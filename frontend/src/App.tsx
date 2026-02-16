@@ -19,7 +19,7 @@ import LandingPage from "@/pages/LandingPage";
 import AuthCallbackPage from "@/pages/AuthCallbackPage";
 import BecomeTutorPage from "@/pages/BecomeTutorPage";
 import CourseDetailsPage from "@/pages/CourseDetailsPage";
-import TutorDashboardPage from "@/pages/TutorDashboardPage";
+
 import CohortPage from "@/pages/CohortPage";
 import OnDemandPage from "@/pages/OnDemandPage";
 import WorkshopPage from "@/pages/WorkshopPage";
@@ -56,7 +56,7 @@ function Router() {
       <Route path="/course/:id" component={CourseDetailsPage} />
       <Route path="/student-dashboard" component={StudentDashboardPage} />
       <Route path="/auth/callback" component={AuthCallbackPage} />
-      <Route path="/tutors" component={TutorDashboardPage} />
+
 
       {/* Default route goes to dashboard */}
       <Route path="/" component={LandingPage} />

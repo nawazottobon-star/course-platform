@@ -8,12 +8,12 @@ import { usersRouter } from "./routes/users";
 import { cartRouter } from "./routes/cart";
 import { lessonsRouter } from "./routes/lessons";
 import { coursesRouter } from "./routes/courses";
-import { tutorApplicationsRouter } from "./routes/tutorApplications";
+
 import { pagesRouter } from "./routes/pages";
 import { env } from "./config/env";
 import { assistantRouter } from "./routes/assistant";
 import { quizRouter } from "./routes/quiz";
-import { tutorsRouter } from "./routes/tutors";
+
 import { adminRouter } from "./routes/admin";
 import { coldCallRouter } from "./routes/coldCall";
 import { activityRouter } from "./routes/activity";
@@ -58,11 +58,11 @@ export function createApp(): Express {
   app.use("/cart", cartRouter);
   app.use("/lessons", lessonsRouter);
   app.use("/courses", coursesRouter);
-  app.use("/tutor-applications", tutorApplicationsRouter);
+
   app.use("/pages", pagesRouter);
   app.use("/assistant", assistantRouter);
   app.use("/quiz", quizRouter);
-  app.use("/tutors", tutorsRouter);
+
   app.use("/admin", adminRouter);
   app.use("/cold-call", coldCallRouter);
   app.use("/activity", activityRouter);
@@ -80,11 +80,11 @@ export function createApp(): Express {
   apiRouter.use("/cart", cartRouter);
   apiRouter.use("/lessons", lessonsRouter);
   apiRouter.use("/courses", coursesRouter);
-  apiRouter.use("/tutor-applications", tutorApplicationsRouter);
+
   apiRouter.use("/pages", pagesRouter);
   apiRouter.use("/assistant", assistantRouter);
   apiRouter.use("/quiz", quizRouter);
-  apiRouter.use("/tutors", tutorsRouter);
+
   apiRouter.use("/admin", adminRouter);
   apiRouter.use("/cold-call", coldCallRouter);
   apiRouter.use("/activity", activityRouter);
